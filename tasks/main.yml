@@ -1,0 +1,43 @@
+---
+- name: Check if Zscaler is already installed.
+  stat:
+    path: "{{ zscaler_connector_path }}"
+  register: zscaler_connector_stat
+
+- name: Download zscaler RPM
+  get_url:
+    url: "{{ zpaconnector_uri }}"
+    dest: /tmp/zpaconnector.rpm
+  when: not zscaler_connector_stat.stat.exists
+
+- name: Download zscaler signing key
+  get_url:
+    url: "{{ zscalergpg_uri }}"
+    dest: /tmp/zscaler.gpg
+    checksum: "{{ zscalergpg_checksum }}"
+  when: not zscaler_connector_stat.stat.exists
+
+- name: Install Zscaler signing key
+  rpm_key:
+    state: present
+    key: /tmp/zscaler.gpg
+
+- name: Install ZPA Connector
+  yum:
+    name: "/tmp/zpaconnector.rpm"
+    state: present
+  when: not zscaler_connector_stat.stat.exists
+
+- name: Copy ZPA Provisioning Key
+  copy:
+    content: "{{ zpa_provisioningkey }}"
+    dest: /opt/zscaler/var/provision_key
+    owner: zscaler
+    group: zscaler
+    mode: 0644
+
+- name: ZPA Start and Enable
+  service:
+    name: zpa-connector
+    state: started
+    enabled: yes

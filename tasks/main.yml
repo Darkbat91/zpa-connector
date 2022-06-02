@@ -1,4 +1,9 @@
 ---
+- name: Confirm provisioning key was provided
+  debug:
+    msg: "zpa_provisioningkey is required"
+  failed_when: zpa_provisioningkey is not defined
+
 - name: Check if Zscaler repo is already installed.
   stat:
     path: "{{ zscaler_repofile_path }}"

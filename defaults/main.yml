@@ -1,8 +1,5 @@
 ---
-zscaler_connector_path: "/opt/zscaler/bin/zpa-connector"
+zscaler_repofile_path: "/etc/yum.repos.d/zscaler.repo"
 
-zscalergpg_uri: https://dist.private.zscaler.com/gpg
+zpaconnector_repo_gpg_key_url: https://dist.private.zscaler.com/gpg
 zscalergpg_checksum: 'sha256:BFFD6E84E8AA2BC4E8B989555302A05451590CFEA1531C4865903745951CC665'
-
-zpaconnector_version: '18.66.2-1.el7'
-zpaconnector_uri: 'https://dist.private.zscaler.com/yum/el7/zpa-connector-{{ zpaconnector_version }}.x86_64.rpm'

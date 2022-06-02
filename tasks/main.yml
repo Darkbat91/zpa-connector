@@ -1,43 +1,32 @@
 ---
-- name: Check if Zscaler is already installed.
+- name: Check if Zscaler repo is already installed.
   stat:
-    path: "{{ zscaler_connector_path }}"
-  register: zscaler_connector_stat
+    path: "{{ zscaler_repofile_path }}"
+  register: zscaler_repofile_stat
 
-- name: Download zscaler RPM
-  get_url:
-    url: "{{ zpaconnector_uri }}"
-    dest: /tmp/zpaconnector.rpm
-  when: not zscaler_connector_stat.stat.exists
-
-- name: Download zscaler signing key
-  get_url:
-    url: "{{ zscalergpg_uri }}"
-    dest: /tmp/zscaler.gpg
-    checksum: "{{ zscalergpg_checksum }}"
-  when: not zscaler_connector_stat.stat.exists
-
-- name: Install Zscaler signing key
+- name: Import zscaler GPG Key
   rpm_key:
+    key: "{{ zpaconnector_repo_gpg_key_url }}"
     state: present
-    key: /tmp/zscaler.gpg
+  when: not zscaler_repofile_stat.stat.exists
 
-- name: Install ZPA Connector
-  yum:
-    name: "/tmp/zpaconnector.rpm"
-    state: present
-  when: not zscaler_connector_stat.stat.exists
+- name: Copy Zscaler repo to repos.d
+  ansible.builtin.copy:
+    src: etc_yumreposd_zscaler.repo
+    dest: "{{ zscaler_repofile_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  when: not zscaler_repofile_stat.stat.exists
 
-- name: Copy ZPA Provisioning Key
-  copy:
-    content: "{{ zpa_provisioningkey }}"
-    dest: /opt/zscaler/var/provision_key
-    owner: zscaler
-    group: zscaler
-    mode: 0644
+# - name: Install ZPA Connector
+#   yum:
+#     name: "zpa-connector"
+#     state: present
+#   when: not zscaler_connector_stat.stat.exists
 
-- name: ZPA Start and Enable
-  service:
-    name: zpa-connector
-    state: started
-    enabled: yes
+# - name: ZPA Start and Enable
+#   service:
+#     name: zpa-connector
+#     state: started
+#     enabled: yes

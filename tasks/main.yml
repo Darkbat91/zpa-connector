@@ -19,14 +19,29 @@
     mode: '0644'
   when: not zscaler_repofile_stat.stat.exists
 
-# - name: Install ZPA Connector
-#   yum:
-#     name: "zpa-connector"
-#     state: present
-#   when: not zscaler_connector_stat.stat.exists
+- name: Install ZPA Connector
+  yum:
+    name: "zpa-connector"
+    state: present
 
-# - name: ZPA Start and Enable
-#   service:
-#     name: zpa-connector
-#     state: started
-#     enabled: yes
+- name: ZPA Stop service
+  service:
+    name: zpa-connector
+    state: stopped
+    enabled: yes
+  when: not zscaler_connector_stat.stat.exists
+
+- name: Copy ZPA Provisioning Key
+  copy:
+    content: "{{ zpa_provisioningkey }}"
+    dest: /opt/zscaler/var/provision_key
+    owner: zscaler
+    group: zscaler
+    mode: 0644
+  when: not zscaler_connector_stat.stat.exists
+
+- name: ZPA Start and Enable
+  service:
+    name: zpa-connector
+    state: started
+    enabled: yes

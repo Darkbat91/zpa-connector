@@ -29,7 +29,7 @@
     name: zpa-connector
     state: stopped
     enabled: yes
-  when: not zscaler_connector_stat.stat.exists
+  when: not zscaler_repofile_stat.stat.exists
 
 - name: Copy ZPA Provisioning Key
   copy:
@@ -38,7 +38,7 @@
     owner: zscaler
     group: zscaler
     mode: 0644
-  when: not zscaler_connector_stat.stat.exists
+  when: not zscaler_repofile_stat.stat.exists
 
 - name: ZPA Start and Enable
   service:
